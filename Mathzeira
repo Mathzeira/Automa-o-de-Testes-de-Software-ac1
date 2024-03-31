@@ -1,0 +1,45 @@
+import unittest
+from unittest.mock import patch
+from blog import Blog
+
+class TestBlog(unittest.TestCase):
+
+    def setUp(self):
+        self.blog = Blog()
+
+    @patch('blog.requests.get')
+    def test_posts(self, mock_get):
+        # Simulate API response
+        mock_get.return_value.json.return_value = [
+            {'userId': 1, 'id': 1, 'title': 'Titulo teste 1', 'body': 'Conteudo do blog 1'},
+            {'userId': 2, 'id': 2, 'title': 'Titulo teste 2', 'body': 'Teste de conteudo do blog 2'}
+        ]
+        
+        # Call the method under test
+        posts = self.blog.posts()
+        
+        # Check if the method returns the expected value
+        self.assertEqual(posts, [
+            {'userId': 1, 'id': 1, 'title': 'Titulo teste 1', 'body': 'Conteudo do blog 1'},
+            {'userId': 2, 'id': 2, 'title': 'Titulo teste 2', 'body': 'Teste de conteudo do blog 2'}
+        ])
+        
+        # Ensure that the requests.get method was called with the correct URL
+        mock_get.assert_called_once_with("https://jsonplaceholder.typicode.com/posts")
+
+    @patch('blog.requests.get')
+    def test_post_by_user_id(self, mock_get):
+        # Simulate API response
+        mock_get.return_value.json.return_value = {'userId': 1, 'id': 1, 'title': 'Titulo teste 1', 'body': 'Conteudo do blog 1'}
+        
+        # Call the method under test
+        post = self.blog.post_by_user_id('1')
+        
+        # Check if the method returns the expected value
+        self.assertEqual(post, {'userId': 1, 'id': 1, 'title': 'Titulo teste 1', 'body': 'Conteudo do blog 1'})
+        
+        # Ensure that the requests.get method was called with the correct URL
+        mock_get.assert_called_once_with("https://jsonplaceholder.typicode.com/posts/1")
+
+if __name__ == '__main__':
+    unittest.main()
